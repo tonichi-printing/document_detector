@@ -34,7 +34,13 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "detectDocument") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}" + call.argument("imagePath"))
+      val argument : String? = call.argument("imagePath")
+      if (argument == null) {
+        result.error("p0", "p1", "p2")
+      }
+      val imagePath : String = argument.toString();
+      val image = ImageLoader().load(imagePath);
+      result.success(image)
     } else {
       result.notImplemented()
     }
