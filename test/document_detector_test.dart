@@ -18,6 +18,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await DocumentDetector.platformVersion, '42');
+    expect(await DocumentDetector.detect('asdf'), '42');
   });
 }
