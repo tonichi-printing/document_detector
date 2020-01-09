@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:document_detector/document_detector.dart';
+import 'package:document_detector_example/display_screen.dart';
 
 class TakePictureScreen extends StatefulWidget {
   final CameraDescription camera;
@@ -68,8 +69,12 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
             await _controller.takePicture(path);
 
             print(path);
-            dynamic quadCoordinates = await DocumentDetector.detect(path);
-            print(quadCoordinates);
+            dynamic documentCoordinates = await DocumentDetector.detect(path);
+            print(documentCoordinates);
+
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => DisplayScreen(documentCoordinates: documentCoordinates)),
+            );
 
           } catch (e) {
             print(e);
