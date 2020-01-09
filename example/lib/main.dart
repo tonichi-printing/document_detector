@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:document_detector/document_detector.dart';
+import 'package:document_detector_example/camera_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      platformVersion = await DocumentDetector.detect('asdf');
+      platformVersion = 'And 9';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -43,14 +43,15 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
-      ),
+      home: CameraScreen(),
+      // home: Scaffold(
+      //   appBar: AppBar(
+      //     title: const Text('Plugin example app'),
+      //   ),
+      //   body: Center(
+      //     child: Text('Running on: $_platformVersion\n'),
+      //   ),
+      // ),
     );
   }
 }
