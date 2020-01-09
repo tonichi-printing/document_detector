@@ -34,18 +34,22 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "detectDocument") {
-      val argument : String? = call.argument("imagePath")
-      if (argument == null) {
-        result.error("p0", "p1", "p2")
-      }
-      val imagePath : String = argument.toString();
-      val image = ImageLoader().load(imagePath);
-      result.success(image)
+      detectDocument(call, result)
     } else {
       result.notImplemented()
     }
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+  }
+
+  fun detectDocument(@NonNull call: MethodCall, @NonNull result: Result) {
+    var imagePath : String? = call.argument("imagePath")
+    if (imagePath == null) {
+      result.error("No image path provided", null, null)
+    }
+    val image = ImageLoader.load(imagePath.toString());
+    val documentCoordinates = DocumentDetector.detect(image);
+    result.success(documentCoordinates)
   }
 }

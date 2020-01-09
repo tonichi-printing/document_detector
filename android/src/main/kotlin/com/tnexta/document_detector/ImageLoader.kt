@@ -1,6 +1,6 @@
 package com.tnexta.document_detector
 
-class ImageLoader() {
+object ImageLoader {
   fun load(imagePath: String): String {
     return imagePath
   }
