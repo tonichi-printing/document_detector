@@ -33,8 +33,8 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
+    if (call.method == "detectDocument") {
+      result.success("Android ${android.os.Build.VERSION.RELEASE}" + call.argument("imagePath"))
     } else {
       result.notImplemented()
     }
