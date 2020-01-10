@@ -7,6 +7,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
+import org.bytedeco.opencv.opencv_core.Mat
 
 /** DocumentDetectorPlugin */
 public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
@@ -48,8 +49,16 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
     if (imagePath == null) {
       result.error("No image path provided", null, null)
     }
-    val image = ImageLoader.load(imagePath.toString());
-    val documentCoordinates = DocumentDetector.detect(image);
-    result.success(documentCoordinates)
+    // Reference: https://github.com/legolas123/cv-tricks.com/blob/master/OpenCV/Edge_detection/edge.py
+    var image : Mat = Mat();
+    try {
+      image = ImageLoader.load(imagePath.toString());
+    } catch (e: IllegalArgumentException) {
+      result.error(e.message, null, null)
+    }
+    result.success((image.dims()).toString())
+
+    // val documentCoordinates = DocumentDetector.detect(image)
+    // result.success(documentCoordinates)
   }
 }
