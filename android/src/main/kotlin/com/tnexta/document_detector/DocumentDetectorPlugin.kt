@@ -57,7 +57,10 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
     // Reference: https://github.com/legolas123/cv-tricks.com/blob/master/OpenCV/Edge_detection/edge.py
     try {
       val image : Mat = ImageLoader.load(imagePath.toString());
-      result.success((image.empty()).toString())
+      val edgedImage = CannyDetector.getEdges(image)
+      // val coordinates = CornerDetector.getCornerCoordinates(edgedImage)
+      org.opencv.imgcodecs.Imgcodecs.imwrite(imagePath, edgedImage)
+      result.success(imagePath)
   } catch (e: IllegalArgumentException) {
       result.error(e.message, null, null)
     }
