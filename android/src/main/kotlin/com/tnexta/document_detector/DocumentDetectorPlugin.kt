@@ -9,7 +9,6 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
 import org.bytedeco.javacpp.Loader
-import org.opencv.core.Mat
 
 /** DocumentDetectorPlugin */
 public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
@@ -37,8 +36,6 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "detectDocument") {
-      Loader.load(org.bytedeco.opencv.opencv_java::class.java)
-
       detectDocument(call, result)
     } else {
       result.notImplemented()
@@ -49,6 +46,8 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   fun detectDocument(@NonNull call: MethodCall, @NonNull result: Result) {
+    Loader.load(org.bytedeco.opencv.opencv_java::class.java)
+
     var imagePath : String? = call.argument("imagePath")
     if (imagePath == null) {
       result.error("No image path provided", null, null)
@@ -56,16 +55,24 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
     // result.success(org.opencv.core.Core.getBuildInformation());
     // Reference: https://github.com/legolas123/cv-tricks.com/blob/master/OpenCV/Edge_detection/edge.py
     try {
-      val image : Mat = ImageLoader.load(imagePath.toString());
+      val image = ImageLoader.load(imagePath.toString());
       val edgedImage = CannyDetector.getEdges(image)
-      // val coordinates = CornerDetector.getCornerCoordinates(edgedImage)
-      org.opencv.imgcodecs.Imgcodecs.imwrite(imagePath, edgedImage)
+      val corners = CornerDetector.getCornerCoordinates(edgedImage)
+      val rect = org.opencv.core.Rect(corners.corners[0], corners.corners[2])
+      val image_roi = org.opencv.core.Mat(image, rect);
+      org.opencv.imgcodecs.Imgcodecs.imwrite(imagePath, image_roi)
       result.success(imagePath)
-  } catch (e: IllegalArgumentException) {
+      // val arr = coordinates.toArray()
+      // var s = ""
+      // for (i in coordinates.corners) {
+      //   s += i.toString() + ", "
+      // }
+      // result.success(s)
+    } catch (e: IllegalArgumentException) {
       result.error(e.message, null, null)
     }
     // result.success((image.dims()).toString())
-    // val documentCoordinates = CannyDetector.hed(image)
+    // val documentCoordinates = CannyDetector.hedown fa(image)
     // result.success((documentCoordinates.dims()).toString())
   }
 }
