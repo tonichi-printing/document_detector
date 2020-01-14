@@ -7,11 +7,14 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
-import org.bytedeco.opencv.opencv_core.Mat
+
+import org.bytedeco.javacpp.Loader
 
 /** DocumentDetectorPlugin */
 public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    Loader.load(org.bytedeco.opencv.opencv_java::class.java)
+
     val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "document_detector")
     channel.setMethodCallHandler(DocumentDetectorPlugin());
   }
@@ -28,6 +31,8 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
   companion object {
     @JvmStatic
     fun registerWith(registrar: Registrar) {
+      Loader.load(org.bytedeco.opencv.opencv_java::class.java)
+
       val channel = MethodChannel(registrar.messenger(), "document_detector")
       channel.setMethodCallHandler(DocumentDetectorPlugin())
     }
@@ -49,16 +54,16 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
     if (imagePath == null) {
       result.error("No image path provided", null, null)
     }
+    // result.success(org.opencv.core.Core.getBuildInformation());
     // Reference: https://github.com/legolas123/cv-tricks.com/blob/master/OpenCV/Edge_detection/edge.py
-    var image : Mat = Mat();
+    var image : org.opencv.core.Mat = org.opencv.core.Mat();
     try {
       image = ImageLoader.load(imagePath.toString());
     } catch (e: IllegalArgumentException) {
       result.error(e.message, null, null)
     }
-    result.success((image.dims()).toString())
-
-    // val documentCoordinates = DocumentDetector.detect(image)
-    // result.success(documentCoordinates)
+    // result.success((image.dims()).toString())
+    val documentCoordinates = HedDetector.hed(image)
+    result.success((documentCoordinates.dims()).toString())
   }
 }

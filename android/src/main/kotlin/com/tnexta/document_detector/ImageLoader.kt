@@ -1,9 +1,7 @@
 package com.tnexta.document_detector
 
-import org.bytedeco.javacpp.Loader
-import org.bytedeco.opencv.global.opencv_dnn
-import org.bytedeco.opencv.opencv_videoio.VideoCapture
-import org.bytedeco.opencv.opencv_core.Mat
+import org.opencv.videoio.VideoCapture
+import org.opencv.core.Mat
 
 object ImageLoader {
   fun load(imagePath: String): Mat {
