@@ -53,7 +53,6 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
       result.error("No image path provided", null, null)
     }
     // result.success(org.opencv.core.Core.getBuildInformation());
-    // Reference: https://github.com/legolas123/cv-tricks.com/blob/master/OpenCV/Edge_detection/edge.py
     try {
       val image = ImageLoader.load(imagePath.toString());
       val edgedImage = CannyDetector.getEdges(image)
