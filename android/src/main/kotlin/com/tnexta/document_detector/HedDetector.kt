@@ -6,7 +6,7 @@ import org.opencv.dnn.Dnn.readNetFromCaffe
 import org.opencv.dnn.Net
 import org.bytedeco.opencv.opencv_dnn.LayerFactory
 import java.nio.file.Paths
-
+import io.flutter.plugin.common.PluginRegistry.Registrar
 
 object HedDetector {
   fun hed(image: Mat): Mat {
@@ -20,7 +20,9 @@ object HedDetector {
 
   fun initializeHedNet() : Net {
     LayerFactory.registerLayer("Crop", CropLayer())
-    var net : Net = readNetFromCaffe("deploy.prototxt.txt", "/hed_pretrained_bsds.caffemodel")
+    val prototext = "dnn/deploy.prototxt.txt";
+    val model = "dnn/hed_pretrained_bsds.caffemodel";
+    var net : Net = readNetFromCaffe(prototext, model)
     return net
   }
 
