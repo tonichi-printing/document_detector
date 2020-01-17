@@ -56,10 +56,10 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
     try {
       val image = ImageLoader.load(imagePath.toString());
       val edgedImage = CannyDetector.getEdges(image)
-      val corners = CornerDetector.getCornerCoordinates(edgedImage)
-      val rect = org.opencv.core.Rect(corners.corners[0], corners.corners[2])
-      val image_roi = org.opencv.core.Mat(image, rect);
-      org.opencv.imgcodecs.Imgcodecs.imwrite(imagePath, image_roi)
+      // val corners = CornerDetector.getCornerCoordinates(edgedImage)
+      // val rect = org.opencv.core.Rect(corners.corners[0], corners.corners[2])
+      // val image_roi = org.opencv.core.Mat(image, rect);
+      org.opencv.imgcodecs.Imgcodecs.imwrite(imagePath, edgedImage)
       result.success(imagePath)
       // val arr = coordinates.toArray()
       // var s = ""
