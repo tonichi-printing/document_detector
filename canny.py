@@ -3,9 +3,9 @@ import cv2 as cv
 import argparse
 
 parser = argparse.ArgumentParser(
-        description='This sample shows how to define custom OpenCV deep learning layers in Python. '
+        description='This file attempts to detect edges of a document in the given image. '
                     'Canny edge detection is used.')
-parser.add_argument('--input', help='Path to image or video. Skip to capture frames from camera')
+parser.add_argument('--input', help='Path to image. Compulsory!')
 args = parser.parse_args()
 
 img = cv.imread(args.input)
@@ -113,17 +113,17 @@ def filterContoursBySize(contours, img_area):
       nContours.append(ci)
   return nContours
 
-def isWithinAcceptableDistance(center, centers, img_area):
+def isWithinAcceptableDistance(center, centers, shape):
+  img_diag = np.sqrt(shape[0]**2 + shape[1]**2)
   for c in centers:
     dx = c[0] - center[0]
     dy = c[1] - center[1]
     D = np.sqrt(dx*dx + dy*dy)
-    print(D)
-    if D**2 < 0.1 * img_area:
+    if D < 0.3 * img_diag:
       return True
   return False
 
-def filterContoursByDistance(contours, img_area):
+def filterContoursByDistance(contours, shape):
   centers=[]
   nContours = []
   for index in range(len(contours)):
@@ -132,7 +132,7 @@ def filterContoursByDistance(contours, img_area):
     cX = int(M['m10'] /M['m00'])
     cY = int(M['m01'] /M['m00'])
     center = [cX, cY]
-    if len(centers) == 0 or isWithinAcceptableDistance(center, centers, img_area):
+    if len(centers) == 0 or isWithinAcceptableDistance(center, centers, shape):
       nContours.append(ci)
       centers.append(center)
   return nContours
@@ -140,11 +140,9 @@ def filterContoursByDistance(contours, img_area):
   centers.append([cX,cY])
 
 def mergeContours(contours):
-  nContours = []
-  for index in range(len(contours)):
-    i = contours[index]
-    nContours.append(i)
-  return [nContours]
+  contour = np.vstack(contours[i] for i in range(len(contours)))
+  return [contour]
+
 
 def hullify(contours):
   nContours = []
@@ -158,14 +156,12 @@ def hullify(contours):
 contours = sorted(contours, key=cv.contourArea, reverse=True)
 img_area = dst.shape[0]*dst.shape[1]
 contours = filterContoursBySize(contours, img_area)
-contours = filterContoursByDistance(contours, img_area)
-# contours = mergeContours(contours)
+contours = filterContoursByDistance(contours, dst.shape)
+contours = mergeContours(contours)
 hull = hullify(contours)
-# hull = mergeHulls(hulls)
-# a = cv.minAreaRect(contours)
-# print(a.shape)
 
 image = cv.drawContours(img.copy(), hull, -1, (0,0,255),3)
 image = cv.drawContours(image, contours, -1, (255,0,0),3)
+
 cv.imshow('Result', image)
 cv.waitKey()
