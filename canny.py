@@ -104,60 +104,68 @@ cv.waitKey()
 
 contours, hierarchy = cv.findContours(dst, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
-def mergeContours(contours):
-  points = []
-  for index in range(len(contours)):
-    i = contours[index]
-    points += i
-  return points
-
-def biggestRectangle(contours):
-  biggest = None
-  max_area = 0
-  indexReturn = -1
-  for index in range(len(contours)):
-    i = contours[index]
-    area = cv.contourArea(i)
-    if area > 100 and area < 900000:
-      peri = cv.arcLength(i,True)
-      approx = cv.approxPolyDP(i,0.1*peri,True)
-      if area > max_area: #and len(approx)==4:
-        biggest = approx
-        max_area = area
-        indexReturn = index
-  return indexReturn
-
-
-def simplify(contours):
+def filterContoursBySize(contours, img_area):
   nContours = []
   for index in range(len(contours)):
     ci = contours[index]
-    simplified_cnt = ci
-    # hull = cv.convexHull(ci)
-    # simplified_cnt = cv.approxPolyDP(hull,0.001*cv.arcLength(hull,True),True)
-    if cv.contourArea(simplified_cnt) > 10000:
-      # peri = cv.arcLength(simplified_cnt, True)
-      # simplified_cnt = cv.approxPolyDP(simplified_cnt,0.1*peri,True)
-      nContours.append(simplified_cnt)
+    contourArea = cv.contourArea(ci)
+    if contourArea > 10000 and contourArea < 0.9 * img_area:
+      nContours.append(ci)
   return nContours
 
+def isWithinAcceptableDistance(center, centers, img_area):
+  for c in centers:
+    dx = c[0] - center[0]
+    dy = c[1] - center[1]
+    D = np.sqrt(dx*dx + dy*dy)
+    print(D)
+    if D**2 < 0.1 * img_area:
+      return True
+  return False
 
-# points = mergeContours(contours)
-contours = simplify(contours)
+def filterContoursByDistance(contours, img_area):
+  centers=[]
+  nContours = []
+  for index in range(len(contours)):
+    ci = contours[index]
+    M = cv.moments(ci)
+    cX = int(M['m10'] /M['m00'])
+    cY = int(M['m01'] /M['m00'])
+    center = [cX, cY]
+    if len(centers) == 0 or isWithinAcceptableDistance(center, centers, img_area):
+      nContours.append(ci)
+      centers.append(center)
+  return nContours
+
+  centers.append([cX,cY])
+
+def mergeContours(contours):
+  nContours = []
+  for index in range(len(contours)):
+    i = contours[index]
+    nContours.append(i)
+  return [nContours]
+
+def hullify(contours):
+  nContours = []
+  for index in range(len(contours)):
+    ci = contours[index]
+    hull = cv.convexHull(ci)
+    print(hull.shape)
+    nContours.append(hull)
+  return nContours
+
+contours = sorted(contours, key=cv.contourArea, reverse=True)
+img_area = dst.shape[0]*dst.shape[1]
+contours = filterContoursBySize(contours, img_area)
+contours = filterContoursByDistance(contours, img_area)
 # contours = mergeContours(contours)
-# indexReturn = biggestRectangle(contours)
-# hull1 = cv.convexHull(contours[indexReturn])
-# hull1 = cv.convexHull(contours)
-# Find the convex hull object for each contour
-# hull_list = []
-# for i in range(len(contours)):
-#     hull = cv.convexHull(contours[i])
-#     hull_list.append(hull)
+hull = hullify(contours)
+# hull = mergeHulls(hulls)
+# a = cv.minAreaRect(contours)
+# print(a.shape)
 
-image = cv.drawContours(img.copy(), contours, -1, (0,0,255),3)
-cv.imshow('All cnts', image)
+image = cv.drawContours(img.copy(), hull, -1, (0,0,255),3)
+image = cv.drawContours(image, contours, -1, (255,0,0),3)
+cv.imshow('Result', image)
 cv.waitKey()
-
-# image = cv.drawContours(img.copy(), [hull1], -1, (0,255,0),3)
-# cv.imshow('Result', image)
-# cv.waitKey()
