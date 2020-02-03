@@ -149,7 +149,6 @@ def hullify(contours):
   for index in range(len(contours)):
     ci = contours[index]
     hull = cv.convexHull(ci)
-    print(hull.shape)
     nContours.append(hull)
   return nContours
 
@@ -160,8 +159,14 @@ contours = filterContoursByDistance(contours, dst.shape)
 contours = mergeContours(contours)
 hull = hullify(contours)
 
+
 image = cv.drawContours(img.copy(), hull, -1, (0,0,255),3)
 image = cv.drawContours(image, contours, -1, (255,0,0),3)
+
+rect = cv.minAreaRect(hull[0])
+box = cv.boxPoints(rect)
+box = np.int0(box)
+image = cv.drawContours(image, [box], 0, (0,255,0), 2)
 
 cv.imshow('Result', image)
 cv.waitKey()
