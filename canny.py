@@ -137,8 +137,6 @@ def filterContoursByDistance(contours, shape):
       centers.append(center)
   return nContours
 
-  centers.append([cX,cY])
-
 def mergeContours(contours):
   contour = np.vstack(contours[i] for i in range(len(contours)))
   return [contour]
