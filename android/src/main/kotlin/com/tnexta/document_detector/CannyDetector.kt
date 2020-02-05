@@ -17,7 +17,7 @@ object CannyDetector {
   fun getEdges(image: Mat): Mat {
     val processedImage : Mat = processImageForContourDetection(image)
     val contours : MutableList<MatOfPoint> = getRelevantContours(processedImage)
-    val hull : MutableList<MatOfPoint2f!> = hullify(contours)
+    val hull : MutableList<MatOfPoint2f> = hullify(contours)
     val rectangle : RotatedRect = Imgproc.minAreaRect(hull[0])
     var vertices : Array<Point> = arrayOf()
     rectangle.points(vertices)
@@ -115,7 +115,7 @@ object CannyDetector {
   }
 
   private fun mergeContours(contours : MutableList<MatOfPoint>): MutableList<MatOfPoint> {
-    val pointsList : MutableList<Point!> = mutableListOf()
+    val pointsList : MutableList<Point> = mutableListOf()
     for (ci in contours) {
       for (point in ci.toArray()) {
         pointsList.add(point)
@@ -130,8 +130,8 @@ object CannyDetector {
     //   return [contour]
   }
 
-  private fun hullify(contours : MutableList<MatOfPoint>): MutableList<MatOfPoint2f!> {
-    val nContours : MutableList<MatOfPoint2f!> = mutableListOf()
+  private fun hullify(contours : MutableList<MatOfPoint>): MutableList<MatOfPoint2f> {
+    val nContours : MutableList<MatOfPoint2f> = mutableListOf()
     var hull : MatOfInt = MatOfInt()
     var hullPoints : MatOfPoint2f;
     for (ci in contours) {
