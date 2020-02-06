@@ -13,20 +13,17 @@ import org.opencv.core.MatOfInt
 
 
 object MinRectDetector {
-  fun getRect(edgedImage: Mat, origImage: Mat) : Mat {
+  fun getRect(edgedImage: Mat, origImage: Mat) : Array<Point> {
     var contours : MutableList<MatOfPoint> = getRelevantContours(edgedImage)
     contours = mergeContours(contours)
     val hull : MutableList<MatOfPoint> = hullify(contours)
-    Imgproc.drawContours(origImage, hull, -1, Scalar(0.0, 0.0, 255.0), 2)
-    return origImage
+    // Imgproc.drawContours(origImage, hull, -1, Scalar(0.0, 0.0, 255.0), 2)
+    // return origImage
     val hull2f : MutableList<MatOfPoint2f> = convertToPoint2f(hull)
     val rectangle : RotatedRect = Imgproc.minAreaRect(hull2f[0])
-    var vertices : Array<Point> = arrayOf()
+    var vertices : Array<Point> = Array<Point>(4) { Point() }
     rectangle.points(vertices)
-    var rect = MatOfPoint()
-    rect.fromArray(*vertices)
-    Imgproc.fillConvexPoly(origImage, rect, Scalar(0.0, 0.0, 255.0))
-    return origImage
+    return vertices
   }
 
   private fun getRelevantContours(image: Mat) : MutableList<MatOfPoint> {

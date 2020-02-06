@@ -56,14 +56,12 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
     try {
       val image = ImageLoader.load(imagePath.toString());
       val edgedImage = CannyDetector.getEdges(image)
-      val imageWithRect = MinRectDetector.getRect(edgedImage, image)
-      org.opencv.imgcodecs.Imgcodecs.imwrite(imagePath, imageWithRect)
+      val rectangleVertices = MinRectDetector.getRect(edgedImage, image)
+      val croppedImage = ImageCropper.crop(rectangleVertices, image)
+      org.opencv.imgcodecs.Imgcodecs.imwrite(imagePath, croppedImage)
       result.success(imagePath)
-    } catch (e: IllegalArgumentException) {
+    } catch (e : Throwable) {
       result.error(e.message, null, null)
     }
-    // result.success((image.dims()).toString())
-    // val documentCoordinates = CannyDetector.hedown fa(image)
-    // result.success((documentCoordinates.dims()).toString())
   }
 }
