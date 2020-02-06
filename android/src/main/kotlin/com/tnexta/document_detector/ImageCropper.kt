@@ -2,29 +2,30 @@ package com.tnexta.document_detector
 
 import org.opencv.core.Mat
 import org.opencv.core.Point
-import org.opencv.core.Rect
+import org.opencv.core.RotatedRect
+import org.opencv.core.Size
+import org.opencv.imgproc.Imgproc
 
 object ImageCropper {
-  fun crop(rectVer : Array<Point>, image: Mat): Mat {
-            // rect is the RotatedRect (I got it from a contour...)
-            RotatedRect rect;
-            // matrices we'll use
-            Mat M, rotated, cropped;
-            // get angle and size from the bounding box
-            float angle = rect.angle;
-            Size rect_size = rect.size;
-            // thanks to http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/
-            if (rect.angle < -45.) {
-                angle += 90.0;
-                swap(rect_size.width, rect_size.height);
-            }
-            // get the rotation matrix
-            M = getRotationMatrix2D(rect.center, angle, 1.0);
-            // perform the affine transformation
-            warpAffine(src, rotated, M, src.size(), INTER_CUBIC);
-            // crop the resulting image
-            getRectSubPix(rotated, rect_size, rect.center, cropped);
-    val rect = Rect(rectVer[0].x, rectVer[0].y , (rectVer[3].x - rectVer[0].x + 1), (rectVer[3].y - p1.y+1))
-    return image
+  fun crop(rect : RotatedRect, image: Mat): Mat {
+    // Refer: https://answers.opencv.org/question/497/extract-a-rotatedrect-area/?answer=518#post-id-518
+
+    var angle : Double = rect.angle
+    val rectSize : Size = rect.size
+
+    if (-45.0 > angle) {
+      angle += 90.0
+      // Refer: https://stackoverflow.com/a/45377921/6402452
+      rectSize.width = rectSize.height.also { rectSize.height = rectSize.width }
+    }
+
+    var M : Mat = Imgproc.getRotationMatrix2D(rect.center, angle, 1.0)
+    var rotated : Mat = Mat()
+    Imgproc.warpAffine(image, rotated, M, image.size(), Imgproc.INTER_CUBIC)
+
+    var cropped : Mat = Mat()
+    Imgproc.getRectSubPix(rotated, rectSize, rect.center, cropped)
+
+    return cropped
   }
 }

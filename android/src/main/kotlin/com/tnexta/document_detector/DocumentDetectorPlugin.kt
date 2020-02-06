@@ -52,12 +52,12 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
     if (imagePath == null) {
       result.error("No image path provided", null, null)
     }
-    // result.success(org.opencv.core.Core.getBuildInformation());
+    // result.success(org.opencv.core.Core.getBuildInformation())
     try {
       val image = ImageLoader.load(imagePath.toString());
       val edgedImage = CannyDetector.getEdges(image)
-      val rectangleVertices = MinRectDetector.getRect(edgedImage, image)
-      val croppedImage = ImageCropper.crop(rectangleVertices, image)
+      val rect = MinRectDetector.getRect(edgedImage, image)
+      val croppedImage = ImageCropper.crop(rect, image)
       org.opencv.imgcodecs.Imgcodecs.imwrite(imagePath, croppedImage)
       result.success(imagePath)
     } catch (e : Throwable) {
