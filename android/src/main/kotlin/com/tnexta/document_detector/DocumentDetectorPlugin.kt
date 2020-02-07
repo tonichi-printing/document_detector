@@ -8,6 +8,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
+import org.bytedeco.javacpp.Loader
+
 /** DocumentDetectorPlugin */
 public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -34,12 +36,32 @@ public class DocumentDetectorPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "detectDocument") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}" + call.argument("imagePath"))
+      detectDocument(call, result)
     } else {
       result.notImplemented()
     }
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+  }
+
+  fun detectDocument(@NonNull call: MethodCall, @NonNull result: Result) {
+    Loader.load(org.bytedeco.opencv.opencv_java::class.java)
+
+    var imagePath : String? = call.argument("imagePath")
+    if (imagePath == null) {
+      result.error("No image path provided", null, null)
+    }
+    // result.success(org.opencv.core.Core.getBuildInformation())
+    try {
+      val image = ImageLoader.load(imagePath.toString());
+      val edgedImage = CannyDetector.getEdges(image)
+      val rect = MinRectDetector.getRect(edgedImage, image)
+      val croppedImage = ImageCropper.crop(rect, image)
+      org.opencv.imgcodecs.Imgcodecs.imwrite(imagePath, croppedImage)
+      result.success(imagePath)
+    } catch (e : Throwable) {
+      result.error(e.message, null, null)
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 class DisplayScreen extends StatelessWidget {
   final String documentCoordinates;
@@ -17,7 +18,8 @@ class DisplayScreen extends StatelessWidget {
         ),
       ),
       body: Center(
-        child: Text('Document Quadrilateral Coordinates: ' + documentCoordinates + '\n'),
+        // child: Text(documentCoordinates),
+        child: Image.file(File(documentCoordinates)),
       ),
     );
   }
