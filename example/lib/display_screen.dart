@@ -18,8 +18,8 @@ class DisplayScreen extends StatelessWidget {
         ),
       ),
       body: Center(
-        // child: Text(documentCoordinates),
-        child: Image.file(File(documentCoordinates)),
+        child: Text(documentCoordinates),
+        // child: Image.file(File(documentCoordinates)),
       ),
     );
   }
