@@ -25,7 +25,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   camera: 38cc83ae9a5667bb5a71c7d9edaf60a91920fd4e
-  document_detector: f64cfe2007c9d712a997109c06e28ae9745f8629
+  document_detector: 7dc04bc7775f7cbff98ae8078200c8ca6eadc85e
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
 
