@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import Vision
 
 public class SwiftDocumentDetectorPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -8,31 +9,24 @@ public class SwiftDocumentDetectorPlugin: NSObject, FlutterPlugin {
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     guard call.method == "detectDocument" else {
       return result(FlutterMethodNotImplemented)
     }
-    var imagePath : String = "";
-    if let args = call.arguments as? [String: Any] {
-      imagePath = args["imagePath"] as? String ?? ""
-    }
-    // if (imagePath == '') {
-    //   return result("noImagePathProvided")
-    // }
-    return result(imagePath)
 
-    // let image    = UIImage(contentsOfFile: imageURL.path)
-    // let imageRequestHandler = VNImageRequestHandler(cgImage: image,
-    //                                                 orientation: orientation,
-    //                                                 options: [:])
-    // lazy var rectangleDetectionRequest: VNDetectRectanglesRequest = {
-    //   let rectDetectRequest = VNDetectRectanglesRequest(completionHandler: self.handleDetectedRectangles)
-    //   // Customize & configure the request to detect only certain rectangles.
-    //   rectDetectRequest.maximumObservations = 8 // Vision currently supports up to 16.
-    //   rectDetectRequest.minimumConfidence = 0.6 // Be confident.
-    //   rectDetectRequest.minimumAspectRatio = 0.5 // height / width
-    //   return rectDetectRequest
-    // }()
+    // Get Path
+    let args = call.arguments as! [String: Any]
+    let imagePath = args["imagePath"] as? String ?? ""
+    if imagePath.isEmpty {
+      return result("noImagePathProvided")
+    }
+
+    let url = URL(fileURLWithPath: imagePath)
+        if #available(iOS 11.0, *) {
+            return detectCard(url: url, result: result)
+        } else {
+            return result("iOS not Supported")
+        }
 
     // do {
     //   try imageRequestHandler.perform(requests)
@@ -52,4 +46,28 @@ public class SwiftDocumentDetectorPlugin: NSObject, FlutterPlugin {
     // result("iOS " + UIDevice.current.systemVersion)
     // return
   }
+
+    @available(iOS 11.0, *)
+    func detectCard(url: URL, result: @escaping FlutterResult) {
+        let imageRequestHandler = VNImageRequestHandler(url: url,
+        options: [:])
+
+        let rectDetectRequest = VNDetectRectanglesRequest()
+        // Customize & configure the request to detect only certain rectangles.
+        rectDetectRequest.maximumObservations = 8 // Vision currently supports up to 16.
+        rectDetectRequest.minimumConfidence = 0.6 // Be confident.
+        rectDetectRequest.minimumAspectRatio = 0.5 // height / width
+        
+        do {
+            try imageRequestHandler.perform([rectDetectRequest])
+        } catch let error as NSError {
+            return result("Failed to perform image request: \(error)")
+        }
+    
+        guard let rects = rectDetectRequest.results as? [VNRectangleObservation] else { return result("failed1") }
+        print("size of numbers is : \(rects.count)")
+        guard let rect = rects.first else{return result("failed2")}
+        return result("suceesssss")
+        return result(rect.boundingBox)
+    }
 }
