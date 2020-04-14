@@ -37,6 +37,9 @@ public class SwiftDocumentDetectorPlugin: NSObject, FlutterPlugin {
   @available(iOS 11.0, *)
   private func detectCard(result: @escaping FlutterResult, imagePath: String) {
     let url = URL(fileURLWithPath: imagePath)
+    let data = try! Data(contentsOf: url)
+    let image = UIImage(data: data)!
+    print("\(image.size.height) adn \(image.size.width)")
     let imageRequestHandler = VNImageRequestHandler(url: url, options: [:])
 
     let rectDetectRequest = VNDetectRectanglesRequest()
@@ -70,10 +73,28 @@ public class SwiftDocumentDetectorPlugin: NSObject, FlutterPlugin {
     let image = UIImage(data: data)!
     let width = image.size.width
     let height = image.size.height
-    let topLeft = CGPoint(x: rect.topLeft.x * width, y: rect.topLeft.y * height)
-    let topRight = CGPoint(x: rect.topRight.x * width, y: rect.topRight.y * height)
-    let bottomLeft = CGPoint(x: rect.bottomLeft.x * width, y: rect.bottomLeft.y * height)
-    let bottomRight = CGPoint(x: rect.bottomRight.x * width, y: rect.bottomRight.y * height)
+
+    var transform: CGAffineTransform
+    if UIApplication.shared.statusBarOrientation.isLandscape {
+      transform = CGAffineTransform.identity
+        .scaledBy(x: -1, y: 1)
+        .translatedBy(x: -width, y: 0)
+        .scaledBy(x: width, y: height)
+    } else {
+      transform = CGAffineTransform.identity
+        .scaledBy(x: 1, y: -1)
+        .translatedBy(x: 0, y: -height)
+        .scaledBy(x: width, y: height)
+    }
+
+//    let transform = CGAffineTransform.identity
+//    .scaledBy(x: -1, y: 1)
+//    .translatedBy(x: -width, y: 0)
+//    .scaledBy(x: width, y: height)
+    let topLeft = rect.topLeft.applying(transform)
+    let topRight = rect.topRight.applying(transform)
+    let bottomLeft = rect.bottomLeft.applying(transform)
+    let bottomRight = rect.bottomRight.applying(transform)
 
     filter.setValue(CIVector(cgPoint: topLeft), forKey: "inputTopLeft")
     filter.setValue(CIVector(cgPoint: topRight), forKey: "inputTopRight")
@@ -90,8 +111,8 @@ public class SwiftDocumentDetectorPlugin: NSObject, FlutterPlugin {
 //    else {
 //      throw ProcessingError.cantCropImage
 //    }
-//    print([rect.minX, rect.minY, rect.width, rect.height], separator: ", ", terminator: ";")
-    return UIImage(ciImage: perspectiveImage)
+    print([topLeft.x, topLeft.y, bottomRight.x, bottomRight.y], separator: ", ", terminator: ";")
+    return UIImage(ciImage: perspectiveImage, scale: -1.0, orientation: .leftMirrored)
   }
 
   private func saveImage(image: UIImage, url: URL) throws {
