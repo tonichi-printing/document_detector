@@ -37,16 +37,13 @@ public class SwiftDocumentDetectorPlugin: NSObject, FlutterPlugin {
   @available(iOS 11.0, *)
   private func detectCard(result: @escaping FlutterResult, imagePath: String) {
     let url = URL(fileURLWithPath: imagePath)
-    let data = try! Data(contentsOf: url)
-    let image = UIImage(data: data)!
-    print("\(image.size.height) adn \(image.size.width)")
     let imageRequestHandler = VNImageRequestHandler(url: url, options: [:])
 
     let rectDetectRequest = VNDetectRectanglesRequest()
     // Customize & configure the request to detect only certain rectangles.
-    rectDetectRequest.maximumObservations = 8 // Vision currently supports up to 16.
+    rectDetectRequest.maximumObservations = 1 // Vision currently supports up to 16.
     rectDetectRequest.minimumConfidence = 0.6 // Be confident.
-    rectDetectRequest.minimumAspectRatio = 0.5 // height / width
+    rectDetectRequest.maximumAspectRatio = 1 // height / width
 
     do {
       try imageRequestHandler.perform([rectDetectRequest])
@@ -87,10 +84,6 @@ public class SwiftDocumentDetectorPlugin: NSObject, FlutterPlugin {
         .scaledBy(x: width, y: height)
     }
 
-//    let transform = CGAffineTransform.identity
-//    .scaledBy(x: -1, y: 1)
-//    .translatedBy(x: -width, y: 0)
-//    .scaledBy(x: width, y: height)
     let topLeft = rect.topLeft.applying(transform)
     let topRight = rect.topRight.applying(transform)
     let bottomLeft = rect.bottomLeft.applying(transform)
@@ -103,14 +96,8 @@ public class SwiftDocumentDetectorPlugin: NSObject, FlutterPlugin {
 
     let ciImage = CIImage(image: image)!.oriented(.up)
     filter.setValue(ciImage, forKey: kCIInputImageKey)
-    guard let perspectiveImage: CIImage = filter.value(forKey: kCIOutputImageKey) as? CIImage else { throw ProcessingError.cantCropImage
-    }
-//    let data = try! Data(contentsOf: url)
-//    let image = UIImage(data: data)!
-//    guard let croppedCGImage: CGImage = image.cgImage?.cropping(to: CGRect(x: rect.minX * image.size.width, y: rect.minY * image.size.height, width: rect.width * image.size.width, height: rect.height * image.size.height))
-//    else {
-//      throw ProcessingError.cantCropImage
-//    }
+    guard let perspectiveImage: CIImage = filter.value(forKey: kCIOutputImageKey) as? CIImage else { throw ProcessingError.cantCropImage }
+
     print([topLeft.x, topLeft.y, bottomRight.x, bottomRight.y], separator: ", ", terminator: ";")
     return UIImage(ciImage: perspectiveImage, scale: -1.0, orientation: .leftMirrored)
   }
